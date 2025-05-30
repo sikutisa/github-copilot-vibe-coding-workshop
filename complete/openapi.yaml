@@ -1,39 +1,46 @@
 openapi: 3.0.3
 info:
-  title: "Simple SNS API"
-  description: "SNS 앱 개발을 위한 CRUD API (초보자용 예시)"
+  title: "Simple Social Media Application API"
+  description: "Backend API for the Simple Social Media Application"
   version: "1.0.0"
+  contact:
+    name: "API Support"
+    email: "api.support@contoso.com"
 
 servers:
-  - url: http://localhost:8000
-    description: 로컬 개발 서버
+  - url: http://localhost:8000/api
 
 tags:
   - name: "Posts"
-    description: "포스트(Post) 관련 API"
   - name: "Comments"
-    description: "댓글(Comment) 관련 API"
   - name: "Likes"
-    description: "좋아요(Like) 관련 API"
 
 paths:
-  /api/posts:
+  /posts:
     get:
       tags: ["Posts"]
-      summary: 모든 포스트 목록 조회
+      summary: List all posts
+      description: "Retrieve a list of all posts in the social media application."
       operationId: getPosts
       responses:
         "200":
-          description: 포스트 목록 조회 성공
+          description: "Successfully retrieved the list of posts."
           content:
             application/json:
               schema:
                 type: array
                 items:
                   $ref: "#/components/schemas/Post"
+        "500":
+          description: "Internal server error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
     post:
       tags: ["Posts"]
-      summary: 새 포스트 작성
+      summary: Create a new post
+      description: "Create a new post in the social media application."
       operationId: createPost
       requestBody:
         required: true
@@ -43,22 +50,29 @@ paths:
               $ref: "#/components/schemas/CreatePostRequest"
       responses:
         "201":
-          description: 포스트 작성 성공
+          description: "Successfully created a new post."
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/Post"
         "400":
-          description: 잘못된 요청
+          description: "Bad request"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: "Internal server error"
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
 
-  /api/posts/{postId}:
+  /posts/{postId}:
     get:
       tags: ["Posts"]
-      summary: 특정 포스트 조회
+      summary: Retrieve a specific post by ID
+      description: "Retrieve a specific post by its ID."
       operationId: getPost
       parameters:
         - name: postId
@@ -66,24 +80,30 @@ paths:
           required: true
           schema:
             type: integer
-          description: 조회하려는 포스트의 ID
+          description: "ID of the post to retrieve"
       responses:
         "200":
-          description: 포스트 조회 성공
+          description: "Successfully retrieved the post."
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/Post"
         "404":
-          description: 포스트를 찾을 수 없음
+          description: "Post not found"
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
-
+        "500":
+          description: "Internal server error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
     patch:
       tags: ["Posts"]
-      summary: 특정 포스트 수정
+      summary: Update a specific post by ID
+      description: "Update a specific post."
       operationId: updatePost
       parameters:
         - name: postId
@@ -91,7 +111,7 @@ paths:
           required: true
           schema:
             type: integer
-          description: 수정하려는 포스트의 ID
+          description: "ID of the post to update"
       requestBody:
         required: true
         content:
@@ -100,27 +120,33 @@ paths:
               $ref: "#/components/schemas/UpdatePostRequest"
       responses:
         "200":
-          description: 포스트 수정 성공
+          description: "Successfully updated the post."
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/Post"
         "400":
-          description: 잘못된 요청
+          description: "Bad request"
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
         "404":
-          description: 포스트를 찾을 수 없음
+          description: "Post not found"
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
-
+        "500":
+          description: "Internal server error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
     delete:
       tags: ["Posts"]
-      summary: 특정 포스트 삭제
+      summary: Delete a specific post by ID
+      description: "Delete a specific post."
       operationId: deletePost
       parameters:
         - name: postId
@@ -128,21 +154,28 @@ paths:
           required: true
           schema:
             type: integer
-          description: 삭제하려는 포스트의 ID
+          description: "ID of the post to delete"
       responses:
         "204":
-          description: 포스트 삭제 성공
+          description: "Successfully deleted the post."
         "404":
-          description: 포스트를 찾을 수 없음
+          description: "Post not found"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: "Internal server error"
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
 
-  /api/posts/{postId}/comments:
+  /posts/{postId}/comments:
     get:
       tags: ["Comments"]
-      summary: 특정 포스트의 댓글 목록 조회
+      summary: Retrieve a list of comments for a specific post
+      description: "Retrieve a list of comments for a specific post."
       operationId: getComments
       parameters:
         - name: postId
@@ -150,10 +183,10 @@ paths:
           required: true
           schema:
             type: integer
-          description: 댓글을 조회할 대상 포스트 ID
+          description: "ID of the post to retrieve comments for"
       responses:
         "200":
-          description: 댓글 목록 조회 성공
+          description: "Successfully retrieved the list of comments."
           content:
             application/json:
               schema:
@@ -161,14 +194,21 @@ paths:
                 items:
                   $ref: "#/components/schemas/Comment"
         "404":
-          description: 포스트를 찾을 수 없음
+          description: "Post not found"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: "Internal server error"
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
     post:
       tags: ["Comments"]
-      summary: 특정 포스트에 댓글 작성
+      summary: Create a comment on a specific post
+      description: "Create a comment on a specific post."
       operationId: createComment
       parameters:
         - name: postId
@@ -176,7 +216,7 @@ paths:
           required: true
           schema:
             type: integer
-          description: 댓글을 작성할 대상 포스트 ID
+          description: "ID of the post to create a comment on"
       requestBody:
         required: true
         content:
@@ -185,7 +225,7 @@ paths:
               $ref: "#/components/schemas/CreateCommentRequest"
       responses:
         "201":
-          description: 댓글 작성 성공
+          description: "Successfully created a comment."
           content:
             application/json:
               schema:
@@ -202,11 +242,18 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: "Internal server error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
 
-  /api/posts/{postId}/comments/{commentId}:
+  /posts/{postId}/comments/{commentId}:
     get:
       tags: ["Comments"]
-      summary: 특정 댓글 조회
+      summary: Retrieve a specific comment by ID
+      description: "Retrieve a specific comment by its ID."
       operationId: getComment
       parameters:
         - name: postId
@@ -214,16 +261,16 @@ paths:
           required: true
           schema:
             type: integer
-          description: 댓글이 달린 포스트의 ID
+          description: "ID of the post the comment belongs to"
         - name: commentId
           in: path
           required: true
           schema:
             type: integer
-          description: 조회하려는 댓글의 ID
+          description: "ID of the comment to retrieve"
       responses:
         "200":
-          description: 댓글 조회 성공
+          description: "Successfully retrieved the comment."
           content:
             application/json:
               schema:
@@ -234,10 +281,16 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
-
+        "500":
+          description: "Internal server error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
     patch:
       tags: ["Comments"]
-      summary: 특정 댓글 수정
+      summary: Update a specific comment by ID
+      description: "Update a specific comment."
       operationId: updateComment
       parameters:
         - name: postId
@@ -245,13 +298,13 @@ paths:
           required: true
           schema:
             type: integer
-          description: 댓글이 달린 포스트의 ID
+          description: ID of the post the comment belongs to
         - name: commentId
           in: path
           required: true
           schema:
             type: integer
-          description: 수정하려는 댓글의 ID
+          description: ID of the comment to update
       requestBody:
         required: true
         content:
@@ -266,21 +319,27 @@ paths:
               schema:
                 $ref: "#/components/schemas/Comment"
         "400":
-          description: 잘못된 요청
+          description: "Bad request"
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
         "404":
-          description: 댓글 또는 포스트를 찾을 수 없음
+          description: "Comment or post not found"
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
-
+        "500":
+          description: "Internal server error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
     delete:
       tags: ["Comments"]
-      summary: 특정 댓글 삭제
+      summary: Delete a specific comment by ID
+      description: "Delete a specific comment."
       operationId: deleteComment
       parameters:
         - name: postId
@@ -288,27 +347,34 @@ paths:
           required: true
           schema:
             type: integer
-          description: 댓글이 달린 포스트의 ID
+          description: "ID of the post the comment belongs to"
         - name: commentId
           in: path
           required: true
           schema:
             type: integer
-          description: 삭제하려는 댓글의 ID
+          description: "ID of the comment to delete"
       responses:
         "204":
-          description: 댓글 삭제 성공
+          description: "Successfully deleted the comment."
         "404":
-          description: 댓글 또는 포스트를 찾을 수 없음
+          description: "Comment or post not found"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: "Internal server error"
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
 
-  /api/posts/{postId}/likes:
+  /posts/{postId}/likes:
     post:
       tags: ["Likes"]
-      summary: 특정 포스트에 좋아요
+      summary: Like a specific post
+      description: "Like a specific post."
       operationId: likePost
       parameters:
         - name: postId
@@ -316,7 +382,7 @@ paths:
           required: true
           schema:
             type: integer
-          description: 좋아요를 누를 포스트의 ID
+          description: "ID of the post to like"
       requestBody:
         required: true
         content:
@@ -325,23 +391,29 @@ paths:
               $ref: "#/components/schemas/LikeRequest"
       responses:
         "201":
-          description: 좋아요 성공
+          description: "Successfully liked the post."
         "400":
-          description: 잘못된 요청
+          description: "Bad request"
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
         "404":
-          description: 포스트를 찾을 수 없음
+          description: "Post not found"
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
-
+        "500":
+          description: "Internal server error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
     delete:
       tags: ["Likes"]
-      summary: 특정 포스트의 좋아요 취소
+      summary: Unlike a specific post
+      description: "Unlike a specific post."
       operationId: unlikePost
       parameters:
         - name: postId
@@ -349,18 +421,24 @@ paths:
           required: true
           schema:
             type: integer
-          description: 좋아요를 취소할 포스트의 ID
+          description: "ID of the post to unlike"
       responses:
         "204":
-          description: 좋아요 취소 성공
+          description: "Successfully unliked the post."
         "400":
-          description: 잘못된 요청
+          description: "Bad request"
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
         "404":
-          description: 포스트를 찾을 수 없음
+          description: "Post not found"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: "Internal server error"
           content:
             application/json:
               schema:
@@ -368,16 +446,13 @@ paths:
 
 components:
   schemas:
-    # -------------------
-    # 포스트 관련
-    # -------------------
     Post:
       type: object
       properties:
         id:
           type: integer
           example: 1
-        userName:
+        username:
           type: string
           example: "alice"
         content:
@@ -399,7 +474,7 @@ components:
           example: 10
       required:
         - id
-        - userName
+        - username
         - content
         - createdAt
         - updatedAt
@@ -409,10 +484,10 @@ components:
     CreatePostRequest:
       type: object
       required:
-        - userName
+        - username
         - content
       properties:
-        userName:
+        username:
           type: string
           example: "alice"
         content:
@@ -428,9 +503,6 @@ components:
       required:
         - content
 
-    # -------------------
-    # 댓글 관련
-    # -------------------
     Comment:
       type: object
       properties:
@@ -440,7 +512,7 @@ components:
         postId:
           type: integer
           example: 1
-        userName:
+        username:
           type: string
           example: "bob"
         content:
@@ -457,7 +529,7 @@ components:
       required:
         - id
         - postId
-        - userName
+        - username
         - content
         - createdAt
         - updatedAt
@@ -465,10 +537,10 @@ components:
     CreateCommentRequest:
       type: object
       required:
-        - userName
+        - username
         - content
       properties:
-        userName:
+        username:
           type: string
           example: "bob"
         content:
@@ -484,26 +556,20 @@ components:
       required:
         - content
 
-    # -------------------
-    # 좋아요 관련
-    # -------------------
     LikeRequest:
       type: object
       required:
-        - userName
+        - username
       properties:
-        userName:
+        username:
           type: string
           example: "charlie"
 
-    # -------------------
-    # 에러 응답 예시
-    # -------------------
     ErrorResponse:
       type: object
       properties:
         message:
           type: string
-          example: "Bad Request or Not Found"
+          example: "Bad Request, Not Found or Internal Server Error"
       required:
         - message
