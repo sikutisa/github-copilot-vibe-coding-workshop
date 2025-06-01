@@ -111,7 +111,7 @@ Refer to the [README](../README.md) doc for preparation.
     - Analyze the application structure of the existing FastAPI app.
     - Migrate all the endpoints. Both corresponding endpoints should be exactly the same as each other.
     - Use SQLite as the database.
-    - Use in-memory feature of SQLite.
+    - Use `sns_api.db` as the name of the SQLite database.
     - The database should always be initialized whenever starting the app.
     - Use `openapi.yaml` that describes all the endpoints and data schema.
     - The API application should render Swagger UI page through a default endpoint.
