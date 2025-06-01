@@ -88,10 +88,11 @@ Refer to the [README](../README.md) doc for preparation.
     - Identify all the steps first, which you're going to do.
     - Use FastAPI as the API app framework.
     - Use SQLite as the database.
-    - Use in-memory feature of SQLite.
+    - Use `sns_api.db` as the name of the SQLite database.
     - The database should always be initialized whenever starting the app.
     - Use `openapi.yaml` that describes all the endpoints and data schema.
     - Use the port number of `8000`.
+    - Make sure to allow CORS from everywhere.
     - Entrypoint is `main.py`.
     - The API application should render Swagger UI page through a default endpoint.
     - The API application should render exactly the same OpenAPI document through a default endpoint.

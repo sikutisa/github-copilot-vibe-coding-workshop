@@ -87,6 +87,7 @@ Refer to the [README](../README.md) doc for preparation.
     - Use OpenJDK version of `21`.
     - Add dependencies - `Spring Web`, `Spring Boot Actuator` and `Lombok`.
     - Use the port number of `8080`.
+    - Make sure to allow CORS from everywhere.
     - Build the Spring Boot app and verify if the app is built properly.
     - Run this Spring Boot app and verify if the app is running properly.
     - If either building or running the app fails, analyze the issues and fix them.

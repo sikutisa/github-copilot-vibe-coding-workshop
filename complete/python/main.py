@@ -1,485 +1,447 @@
-import sqlite3
-import datetime
-from fastapi import FastAPI, Request, HTTPException, status, APIRouter, Depends
+import uuid
+from datetime import datetime
+from typing import List, Optional, Annotated
+import uuid
+
+from fastapi import FastAPI, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
-from typing import List, Optional
+from pydantic import BaseModel, Field
+from sqlalchemy import create_engine, Column, String, DateTime, Integer, ForeignKey
+from sqlalchemy.orm import sessionmaker, Session, relationship, declarative_base
 
-# Pydantic 모델 정의
-class PostBase(BaseModel):
-    userName: str
+
+# Database setup
+SQLALCHEMY_DATABASE_URL = "sqlite:///./sns_api.db"
+
+engine = create_engine(
+    SQLALCHEMY_DATABASE_URL, 
+    connect_args={"check_same_thread": False},
+    echo=False  # Set to True for debugging
+)
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+Base = declarative_base()
+
+# Database initialization will happen in startup event
+
+
+# Database Models
+class PostDB(Base):
+    __tablename__ = "posts"
+    
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    username = Column(String(50), nullable=False)
+    content = Column(String(2000), nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    comments = relationship("CommentDB", back_populates="post", cascade="all, delete-orphan")
+    likes = relationship("LikeDB", back_populates="post", cascade="all, delete-orphan")
+
+
+class CommentDB(Base):
+    __tablename__ = "comments"
+    
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    post_id = Column(String, ForeignKey("posts.id"), nullable=False)
+    username = Column(String(50), nullable=False)
+    content = Column(String(1000), nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    post = relationship("PostDB", back_populates="comments")
+
+
+class LikeDB(Base):
+    __tablename__ = "likes"
+    
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    post_id = Column(String, ForeignKey("posts.id"), nullable=False)
+    username = Column(String(50), nullable=False)
+    liked_at = Column(DateTime, default=datetime.utcnow)
+    
+    post = relationship("PostDB", back_populates="likes")
+
+
+# Pydantic Models (Request/Response schemas)
+class NewPostRequest(BaseModel):
+    username: str = Field(..., min_length=1, max_length=50)
+    content: str = Field(..., min_length=1, max_length=2000)
+
+
+class UpdatePostRequest(BaseModel):
+    username: str = Field(..., min_length=1, max_length=50)
+    content: str = Field(..., min_length=1, max_length=2000)
+
+
+class Post(BaseModel):
+    id: str
+    username: str
     content: str
-
-class PostCreate(PostBase):
-    pass
-
-class PostUpdate(BaseModel):
-    content: str
-
-class Post(PostBase):
-    id: int
-    createdAt: str
-    updatedAt: str
-    likeCount: int
-    commentCount: int
-
+    createdAt: datetime = Field(alias="created_at", serialization_alias="createdAt")
+    updatedAt: datetime = Field(alias="updated_at", serialization_alias="updatedAt")
+    likesCount: int
+    commentsCount: int
+    
     class Config:
+        populate_by_name = True
         from_attributes = True
 
-class CommentBase(BaseModel):
-    userName: str
+
+class NewCommentRequest(BaseModel):
+    username: str = Field(..., min_length=1, max_length=50)
+    content: str = Field(..., min_length=1, max_length=1000)
+
+
+class UpdateCommentRequest(BaseModel):
+    username: str = Field(..., min_length=1, max_length=50)
+    content: str = Field(..., min_length=1, max_length=1000)
+
+
+class Comment(BaseModel):
+    id: str
+    postId: str = Field(alias="post_id", serialization_alias="postId")
+    username: str
     content: str
-
-class CommentCreate(CommentBase):
-    pass
-
-class CommentUpdate(BaseModel):
-    content: str
-
-class Comment(CommentBase):
-    id: int
-    postId: int
-    createdAt: str
-    updatedAt: str
-
+    createdAt: datetime = Field(alias="created_at", serialization_alias="createdAt")
+    updatedAt: datetime = Field(alias="updated_at", serialization_alias="updatedAt")
+    
     class Config:
+        populate_by_name = True
         from_attributes = True
 
-class LikeBase(BaseModel):
-    userName: str
 
-class Like(LikeBase):
-    postId: int
+class LikeRequest(BaseModel):
+    username: str = Field(..., min_length=1, max_length=50)
 
+
+class LikeResponse(BaseModel):
+    postId: str = Field(serialization_alias="postId")
+    username: str
+    likedAt: datetime = Field(serialization_alias="likedAt")
+    
     class Config:
-        from_attributes = True
+        populate_by_name = True
 
-# FastAPI 애플리케이션 생성
+
+class Error(BaseModel):
+    error: str
+    message: str
+    details: Optional[List[str]] = None
+
+
+# Database dependency
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+
+SessionDep = Annotated[Session, Depends(get_db)]
+
+
+# FastAPI app
 app = FastAPI(
-    title="Simple SNS API",
-    description="간단한 SQLite + FastAPI 예시 (Pydantic 모델 적용)",
-    version="1.0.0"
+    title="Simple Social Media API",
+    description="A basic Social Networking Service (SNS) API that allows users to create, retrieve, update, and delete posts; add comments; and like/unlike posts.",
+    version="1.0.0",
+    contact={
+        "name": "Contoso Product Team",
+        "email": "support@contoso.com"
+    },
+    license_info={
+        "name": "MIT",
+        "url": "https://opensource.org/licenses/MIT"
+    },
+    servers=[
+        {"url": "http://localhost:8000", "description": "Local development server"}
+    ]
 )
 
-# CORS 설정
+# Add CORS middleware to allow requests from everywhere
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["*"],  # Allows all origins
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["*"],  # Allows all methods
+    allow_headers=["*"],  # Allows all headers
 )
 
-# API 라우터 설정
-api_router = APIRouter(prefix="/api")
 
 @app.on_event("startup")
-def startup():
-    conn = sqlite3.connect("sns.db")
-    c = conn.cursor()
+def create_tables():
+    Base.metadata.create_all(bind=engine)
 
-    # 포스트 테이블
-    c.execute("""
-    CREATE TABLE IF NOT EXISTS posts (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      userName TEXT NOT NULL,
-      content TEXT NOT NULL,
-      createdAt TEXT NOT NULL,
-      updatedAt TEXT NOT NULL,
-      likeCount INTEGER NOT NULL,
-      commentCount INTEGER NOT NULL
+
+# Helper functions
+def get_post_counts(db: Session, post: PostDB) -> tuple[int, int]:
+    likes_count = db.query(LikeDB).filter(LikeDB.post_id == post.id).count()
+    comments_count = db.query(CommentDB).filter(CommentDB.post_id == post.id).count()
+    return likes_count, comments_count
+
+
+def post_to_response(db: Session, post: PostDB) -> Post:
+    likes_count, comments_count = get_post_counts(db, post)
+    return Post(
+        id=post.id,
+        username=post.username,
+        content=post.content,
+        createdAt=post.created_at,
+        updatedAt=post.updated_at,
+        likesCount=likes_count,
+        commentsCount=comments_count
     )
-    """)
 
-    # 댓글 테이블
-    c.execute("""
-    CREATE TABLE IF NOT EXISTS comments (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      postId INTEGER NOT NULL,
-      userName TEXT NOT NULL,
-      content TEXT NOT NULL,
-      createdAt TEXT NOT NULL,
-      updatedAt TEXT NOT NULL
+
+# Routes - Posts
+@app.get("/api/posts", response_model=List[Post], tags=["Posts"])
+def get_posts(db: SessionDep):
+    """List all posts"""
+    posts = db.query(PostDB).order_by(PostDB.created_at.desc()).all()
+    return [post_to_response(db, post) for post in posts]
+
+
+@app.post("/api/posts", response_model=Post, status_code=201, tags=["Posts"])
+def create_post(post_data: NewPostRequest, db: SessionDep):
+    """Create a new post"""
+    post = PostDB(
+        id=str(uuid.uuid4()),
+        username=post_data.username,
+        content=post_data.content
     )
-    """)
+    db.add(post)
+    db.commit()
+    db.refresh(post)
+    return post_to_response(db, post)
 
-    # 좋아요 테이블
-    c.execute("""
-    CREATE TABLE IF NOT EXISTS likes (
-      postId INTEGER NOT NULL,
-      userName TEXT NOT NULL,
-      PRIMARY KEY (postId, userName)
+
+@app.get("/api/posts/{post_id}", response_model=Post, tags=["Posts"])
+def get_post_by_id(post_id: str, db: SessionDep):
+    """Get a specific post"""
+    post = db.query(PostDB).filter(PostDB.id == post_id).first()
+    if not post:
+        raise HTTPException(
+            status_code=404,
+            detail={"error": "NOT_FOUND", "message": "The requested resource was not found"}
+        )
+    return post_to_response(db, post)
+
+
+@app.patch("/api/posts/{post_id}", response_model=Post, tags=["Posts"])
+def update_post(post_id: str, post_data: UpdatePostRequest, db: SessionDep):
+    """Update a post"""
+    post = db.query(PostDB).filter(PostDB.id == post_id).first()
+    if not post:
+        raise HTTPException(
+            status_code=404,
+            detail={"error": "NOT_FOUND", "message": "The requested resource was not found"}
+        )
+    
+    post.username = post_data.username
+    post.content = post_data.content
+    post.updated_at = datetime.utcnow()
+    db.commit()
+    db.refresh(post)
+    return post_to_response(db, post)
+
+
+@app.delete("/api/posts/{post_id}", status_code=204, tags=["Posts"])
+def delete_post(post_id: str, db: SessionDep):
+    """Delete a post"""
+    post = db.query(PostDB).filter(PostDB.id == post_id).first()
+    if not post:
+        raise HTTPException(
+            status_code=404,
+            detail={"error": "NOT_FOUND", "message": "The requested resource was not found"}
+        )
+    
+    db.delete(post)
+    db.commit()
+
+
+# Routes - Comments
+@app.get("/api/posts/{post_id}/comments", response_model=List[Comment], tags=["Comments"])
+def get_comments_by_post_id(post_id: str, db: SessionDep):
+    """List comments for a post"""
+    # Check if post exists
+    post = db.query(PostDB).filter(PostDB.id == post_id).first()
+    if not post:
+        raise HTTPException(
+            status_code=404,
+            detail={"error": "NOT_FOUND", "message": "The requested resource was not found"}
+        )
+    
+    comments = db.query(CommentDB).filter(CommentDB.post_id == post_id).order_by(CommentDB.created_at.asc()).all()
+    return [Comment.model_validate(comment) for comment in comments]
+
+
+@app.post("/api/posts/{post_id}/comments", response_model=Comment, status_code=201, tags=["Comments"])
+def create_comment(post_id: str, comment_data: NewCommentRequest, db: SessionDep):
+    """Create a comment"""
+    # Check if post exists
+    post = db.query(PostDB).filter(PostDB.id == post_id).first()
+    if not post:
+        raise HTTPException(
+            status_code=404,
+            detail={"error": "NOT_FOUND", "message": "The requested resource was not found"}
+        )
+    
+    comment = CommentDB(
+        id=str(uuid.uuid4()),
+        post_id=post_id,
+        username=comment_data.username,
+        content=comment_data.content
     )
-    """)
-
-    conn.commit()
-    conn.close()
-
-
-# ------------------------------------------------
-# (1) 모든 포스트 목록 조회 (GET /api/posts)
-# ------------------------------------------------
-@api_router.get("/posts", response_model=List[Post], operation_id="getPosts")
-def get_posts():
-    conn = sqlite3.connect("sns.db")
-    c = conn.cursor()
-    c.execute("SELECT * FROM posts ORDER BY id ASC")
-    rows = c.fetchall()
-    col = [desc[0] for desc in c.description]
-    conn.close()
-
-    # 튜플을 딕셔너리로 변환해서 반환
-    return [dict(zip(col, row)) for row in rows]
+    db.add(comment)
+    db.commit()
+    db.refresh(comment)
+    return Comment.model_validate(comment)
 
 
-# ------------------------------------------------
-# (2) 새 포스트 작성 (POST /api/posts)
-# ------------------------------------------------
-@api_router.post("/posts", status_code=status.HTTP_201_CREATED, response_model=Post, operation_id="createPost")
-def create_post(post: PostCreate):
-    if not post.userName or not post.content:
-        raise HTTPException(status_code=400, detail="userName, content가 필요합니다.")
-
-    now = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-    conn = sqlite3.connect("sns.db")
-    c = conn.cursor()
-    c.execute("""
-        INSERT INTO posts (userName, content, createdAt, updatedAt, likeCount, commentCount)
-        VALUES (?, ?, ?, ?, 0, 0)
-    """, (post.userName, post.content, now, now))
-    post_id = c.lastrowid
-    conn.commit()
-
-    # 삽입 후 해당 포스트 정보를 다시 SELECT
-    c.execute("SELECT * FROM posts WHERE id = ?", (post_id,))
-    row = c.fetchone()
-    col = [desc[0] for desc in c.description]
-    conn.close()
-
-    return dict(zip(col, row))
-
-
-# ------------------------------------------------
-# (3) 특정 포스트 조회 (GET /api/posts/{postId})
-# ------------------------------------------------
-@api_router.get("/posts/{postId}", response_model=Post, operation_id="getPost")
-def get_post(postId: int):
-    conn = sqlite3.connect("sns.db")
-    c = conn.cursor()
-    c.execute("SELECT * FROM posts WHERE id = ?", (postId,))
-    row = c.fetchone()
-    col = [desc[0] for desc in c.description] if c.description else []
-    conn.close()
-
-    if not row:
-        raise HTTPException(status_code=404, detail="포스트를 찾을 수 없습니다.")
-    return dict(zip(col, row))
-
-
-# ------------------------------------------------
-# (4) 특정 포스트 수정 (PATCH /api/posts/{postId})
-# ------------------------------------------------
-@api_router.patch("/posts/{postId}", response_model=Post, operation_id="updatePost")
-def update_post(postId: int, post_update: PostUpdate):
-    if not post_update.content:
-        raise HTTPException(status_code=400, detail="수정할 content가 없습니다.")
-
-    # 기존 포스트 확인
-    conn = sqlite3.connect("sns.db")
-    c = conn.cursor()
-    c.execute("SELECT * FROM posts WHERE id = ?", (postId,))
-    old = c.fetchone()
-    if not old:
-        conn.close()
-        raise HTTPException(status_code=404, detail="포스트를 찾을 수 없습니다.")
-
-    now = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-    c.execute("""
-        UPDATE posts
-        SET content = ?, updatedAt = ?
-        WHERE id = ?
-    """, (post_update.content, now, postId))
-    conn.commit()
-
-    # 수정된 내용 다시 SELECT
-    c.execute("SELECT * FROM posts WHERE id = ?", (postId,))
-    row = c.fetchone()
-    col = [desc[0] for desc in c.description]
-    conn.close()
-
-    return dict(zip(col, row))
-
-
-# ------------------------------------------------
-# (5) 특정 포스트 삭제 (DELETE /api/posts/{postId})
-# ------------------------------------------------
-@api_router.delete("/posts/{postId}", status_code=status.HTTP_204_NO_CONTENT, operation_id="deletePost")
-def delete_post(postId: int):
-    conn = sqlite3.connect("sns.db")
-    c = conn.cursor()
-    c.execute("SELECT id FROM posts WHERE id = ?", (postId,))
-    post = c.fetchone()
+@app.get("/api/posts/{post_id}/comments/{comment_id}", response_model=Comment, tags=["Comments"])
+def get_comment_by_id(post_id: str, comment_id: str, db: SessionDep):
+    """Get a specific comment"""
+    # Check if post exists
+    post = db.query(PostDB).filter(PostDB.id == post_id).first()
     if not post:
-        conn.close()
-        raise HTTPException(status_code=404, detail="포스트를 찾을 수 없습니다.")
-
-    # 해당 포스트 연관된 댓글, 좋아요, 그리고 포스트 자체 삭제
-    c.execute("DELETE FROM comments WHERE postId = ?", (postId,))
-    c.execute("DELETE FROM likes WHERE postId = ?", (postId,))
-    c.execute("DELETE FROM posts WHERE id = ?", (postId,))
-    conn.commit()
-    conn.close()
-    return
-
-
-# ------------------------------------------------
-# (6) 특정 포스트의 댓글 목록 조회 (GET /api/posts/{postId}/comments)
-# ------------------------------------------------
-@api_router.get("/posts/{postId}/comments", response_model=List[Comment], operation_id="getComments")
-def get_comments(postId: int):
-    conn = sqlite3.connect("sns.db")
-    c = conn.cursor()
-
-    # 포스트 존재 확인
-    c.execute("SELECT id FROM posts WHERE id = ?", (postId,))
-    if not c.fetchone():
-        conn.close()
-        raise HTTPException(status_code=404, detail="포스트를 찾을 수 없습니다.")
-
-    c.execute("SELECT * FROM comments WHERE postId = ? ORDER BY id ASC", (postId,))
-    rows = c.fetchall()
-    col = [desc[0] for desc in c.description]
-    conn.close()
-
-    return [dict(zip(col, row)) for row in rows]
+        raise HTTPException(
+            status_code=404,
+            detail={"error": "NOT_FOUND", "message": "The requested resource was not found"}
+        )
+    
+    comment = db.query(CommentDB).filter(
+        CommentDB.id == comment_id,
+        CommentDB.post_id == post_id
+    ).first()
+    if not comment:
+        raise HTTPException(
+            status_code=404,
+            detail={"error": "NOT_FOUND", "message": "The requested resource was not found"}
+        )
+    
+    return Comment.model_validate(comment)
 
 
-# ------------------------------------------------
-# (7) 특정 포스트에 댓글 작성 (POST /api/posts/{postId}/comments)
-# ------------------------------------------------
-@api_router.post("/posts/{postId}/comments", status_code=status.HTTP_201_CREATED, response_model=Comment, operation_id="createComment")
-def create_comment(postId: int, comment: CommentCreate):
-    if not comment.userName or not comment.content:
-        raise HTTPException(status_code=400, detail="userName, content가 필요합니다.")
-
-    conn = sqlite3.connect("sns.db")
-    c = conn.cursor()
-
-    # 포스트 존재 확인
-    c.execute("SELECT id FROM posts WHERE id = ?", (postId,))
-    if not c.fetchone():
-        conn.close()
-        raise HTTPException(status_code=404, detail="포스트를 찾을 수 없습니다.")
-
-    now = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-    c.execute("""
-        INSERT INTO comments (postId, userName, content, createdAt, updatedAt)
-        VALUES (?, ?, ?, ?, ?)
-    """, (postId, comment.userName, comment.content, now, now))
-
-    # 댓글 카운트 갱신
-    c.execute("""
-        UPDATE posts
-        SET commentCount = commentCount + 1,
-            updatedAt = ?
-        WHERE id = ?
-    """, (now, postId))
-    conn.commit()
-
-    comment_id = c.lastrowid
-    c.execute("SELECT * FROM comments WHERE id = ?", (comment_id,))
-    row = c.fetchone()
-    col = [desc[0] for desc in c.description]
-    conn.close()
-
-    return dict(zip(col, row))
-
-
-# ------------------------------------------------
-# (8) 특정 댓글 조회 (GET /api/posts/{postId}/comments/{commentId})
-# ------------------------------------------------
-@api_router.get("/posts/{postId}/comments/{commentId}", response_model=Comment, operation_id="getComment")
-def get_comment(postId: int, commentId: int):
-    conn = sqlite3.connect("sns.db")
-    c = conn.cursor()
-
-    # 포스트 존재
-    c.execute("SELECT id FROM posts WHERE id = ?", (postId,))
-    if not c.fetchone():
-        conn.close()
-        raise HTTPException(status_code=404, detail="포스트를 찾을 수 없습니다.")
-
-    # 해당 댓글
-    c.execute("SELECT * FROM comments WHERE id = ?", (commentId,))
-    row = c.fetchone()
-    col = [desc[0] for desc in c.description] if c.description else []
-    if not row or row[1] != postId:
-        conn.close()
-        raise HTTPException(status_code=404, detail="댓글을 찾을 수 없습니다.")
-    conn.close()
-
-    return dict(zip(col, row))
-
-
-# ------------------------------------------------
-# (9) 특정 댓글 수정 (PATCH /api/posts/{postId}/comments/{commentId})
-# ------------------------------------------------
-@api_router.patch("/posts/{postId}/comments/{commentId}", response_model=Comment, operation_id="updateComment")
-def update_comment(postId: int, commentId: int, comment_update: CommentUpdate):
-    if not comment_update.content:
-        raise HTTPException(status_code=400, detail="수정할 content가 필요합니다.")
-
-    conn = sqlite3.connect("sns.db")
-    c = conn.cursor()
-
-    # 포스트 확인
-    c.execute("SELECT id FROM posts WHERE id = ?", (postId,))
-    if not c.fetchone():
-        conn.close()
-        raise HTTPException(status_code=404, detail="포스트를 찾을 수 없습니다.")
-
-    # 댓글 확인
-    c.execute("SELECT * FROM comments WHERE id = ?", (commentId,))
-    row = c.fetchone()
-    if not row or row[1] != postId:
-        conn.close()
-        raise HTTPException(status_code=404, detail="댓글을 찾을 수 없습니다.")
-
-    now = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-    c.execute("""
-        UPDATE comments
-        SET content = ?, updatedAt = ?
-        WHERE id = ?
-    """, (comment_update.content, now, commentId))
-    conn.commit()
-
-    c.execute("SELECT * FROM comments WHERE id = ?", (commentId,))
-    updated = c.fetchone()
-    col = [desc[0] for desc in c.description]
-    conn.close()
-
-    return dict(zip(col, updated))
-
-
-# ------------------------------------------------
-# (10) 특정 댓글 삭제 (DELETE /api/posts/{postId}/comments/{commentId})
-# ------------------------------------------------
-@api_router.delete("/posts/{postId}/comments/{commentId}", status_code=status.HTTP_204_NO_CONTENT, operation_id="deleteComment")
-def delete_comment(postId: int, commentId: int):
-    conn = sqlite3.connect("sns.db")
-    c = conn.cursor()
-
-    # 포스트 확인
-    c.execute("SELECT id FROM posts WHERE id = ?", (postId,))
-    if not c.fetchone():
-        conn.close()
-        raise HTTPException(status_code=404, detail="포스트를 찾을 수 없습니다.")
-
-    # 댓글 확인
-    c.execute("SELECT * FROM comments WHERE id = ?", (commentId,))
-    row = c.fetchone()
-    if not row or row[1] != postId:
-        conn.close()
-        raise HTTPException(status_code=404, detail="댓글을 찾을 수 없습니다.")
-
-    # 댓글 삭제
-    c.execute("DELETE FROM comments WHERE id = ?", (commentId,))
-
-    # commentCount 재계산
-    now = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-    c.execute("""
-        UPDATE posts
-        SET commentCount = (SELECT COUNT(*) FROM comments WHERE postId = ?),
-            updatedAt = ?
-        WHERE id = ?
-    """, (postId, now, postId))
-
-    conn.commit()
-    conn.close()
-    return
-
-
-# ------------------------------------------------
-# (11) 특정 포스트에 좋아요 (POST /api/posts/{postId}/likes)
-# ------------------------------------------------
-@api_router.post("/posts/{postId}/likes", status_code=status.HTTP_201_CREATED, operation_id="likePost")
-def like_post(postId: int, like: LikeBase):
-    if not like.userName:
-        raise HTTPException(status_code=400, detail="userName이 필요합니다.")
-
-    conn = sqlite3.connect("sns.db")
-    c = conn.cursor()
-
-    # 포스트 확인
-    c.execute("SELECT * FROM posts WHERE id = ?", (postId,))
-    post = c.fetchone()
+@app.patch("/api/posts/{post_id}/comments/{comment_id}", response_model=Comment, tags=["Comments"])
+def update_comment(post_id: str, comment_id: str, comment_data: UpdateCommentRequest, db: SessionDep):
+    """Update a comment"""
+    # Check if post exists
+    post = db.query(PostDB).filter(PostDB.id == post_id).first()
     if not post:
-        conn.close()
-        raise HTTPException(status_code=404, detail="포스트를 찾을 수 없습니다.")
-
-    # 이미 좋아요 눌렀는지 확인
-    c.execute("SELECT * FROM likes WHERE postId = ? AND userName = ?", (postId, like.userName))
-    if c.fetchone():
-        conn.close()
-        raise HTTPException(status_code=400, detail="이미 좋아요를 눌렀습니다.")
-
-    # 좋아요 추가
-    c.execute("INSERT INTO likes (postId, userName) VALUES (?, ?)", (postId, like.userName))
-
-    # likeCount +1
-    now = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-    c.execute("""
-        UPDATE posts
-        SET likeCount = likeCount + 1,
-            updatedAt = ?
-        WHERE id = ?
-    """, (now, postId))
-
-    conn.commit()
-    conn.close()
-
-    return {"message": "좋아요 성공"}
+        raise HTTPException(
+            status_code=404,
+            detail={"error": "NOT_FOUND", "message": "The requested resource was not found"}
+        )
+    
+    comment = db.query(CommentDB).filter(
+        CommentDB.id == comment_id,
+        CommentDB.post_id == post_id
+    ).first()
+    if not comment:
+        raise HTTPException(
+            status_code=404,
+            detail={"error": "NOT_FOUND", "message": "The requested resource was not found"}
+        )
+    
+    comment.username = comment_data.username
+    comment.content = comment_data.content
+    comment.updated_at = datetime.utcnow()
+    db.commit()
+    db.refresh(comment)
+    return Comment.model_validate(comment)
 
 
-# ------------------------------------------------
-# (12) 특정 포스트의 좋아요 취소 (DELETE /api/posts/{postId}/likes)
-# ------------------------------------------------
-@api_router.delete("/posts/{postId}/likes", status_code=status.HTTP_204_NO_CONTENT, operation_id="unlikePost")
-def unlike_post(postId: int, like: LikeBase):
-    if not like.userName:
-        raise HTTPException(status_code=400, detail="userName이 필요합니다.")
-
-    conn = sqlite3.connect("sns.db")
-    c = conn.cursor()
-
-    # 포스트 확인
-    c.execute("SELECT * FROM posts WHERE id = ?", (postId,))
-    post = c.fetchone()
+@app.delete("/api/posts/{post_id}/comments/{comment_id}", status_code=204, tags=["Comments"])
+def delete_comment(post_id: str, comment_id: str, db: SessionDep):
+    """Delete a comment"""
+    # Check if post exists
+    post = db.query(PostDB).filter(PostDB.id == post_id).first()
     if not post:
-        conn.close()
-        raise HTTPException(status_code=404, detail="포스트를 찾을 수 없습니다.")
+        raise HTTPException(
+            status_code=404,
+            detail={"error": "NOT_FOUND", "message": "The requested resource was not found"}
+        )
+    
+    comment = db.query(CommentDB).filter(
+        CommentDB.id == comment_id,
+        CommentDB.post_id == post_id
+    ).first()
+    if not comment:
+        raise HTTPException(
+            status_code=404,
+            detail={"error": "NOT_FOUND", "message": "The requested resource was not found"}
+        )
+    
+    db.delete(comment)
+    db.commit()
 
-    # 좋아요 존재 여부 확인
-    c.execute("SELECT * FROM likes WHERE postId = ? AND userName = ?", (postId, like.userName))
-    if not c.fetchone():
-        conn.close()
-        raise HTTPException(status_code=404, detail="좋아요 정보가 없습니다.")
 
-    # 좋아요 삭제
-    c.execute("DELETE FROM likes WHERE postId = ? AND userName = ?", (postId, like.userName))
+# Routes - Likes
+@app.post("/api/posts/{post_id}/likes", response_model=LikeResponse, status_code=201, tags=["Likes"])
+def like_post(post_id: str, like_data: LikeRequest, db: SessionDep):
+    """Like a post"""
+    # Check if post exists
+    post = db.query(PostDB).filter(PostDB.id == post_id).first()
+    if not post:
+        raise HTTPException(
+            status_code=404,
+            detail={"error": "NOT_FOUND", "message": "The requested resource was not found"}
+        )
+    
+    # Check if user already liked this post
+    existing_like = db.query(LikeDB).filter(
+        LikeDB.post_id == post_id,
+        LikeDB.username == like_data.username
+    ).first()
+    
+    if existing_like:
+        raise HTTPException(
+            status_code=400,
+            detail={"error": "VALIDATION_ERROR", "message": "User has already liked this post"}
+        )
+    
+    like = LikeDB(
+        id=str(uuid.uuid4()),
+        post_id=post_id,
+        username=like_data.username
+    )
+    db.add(like)
+    db.commit()
+    db.refresh(like)
+    
+    return LikeResponse(
+        postId=like.post_id,
+        username=like.username,
+        likedAt=like.liked_at
+    )
 
-    # likeCount -1
-    now = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-    c.execute("""
-        UPDATE posts
-        SET likeCount = likeCount - 1,
-            updatedAt = ?
-        WHERE id = ?
-    """, (now, postId))
 
-    conn.commit()
-    conn.close()
-    return
+@app.delete("/api/posts/{post_id}/likes", status_code=204, tags=["Likes"])
+def unlike_post(post_id: str, db: SessionDep):
+    """Unlike a post"""
+    # Check if post exists
+    post = db.query(PostDB).filter(PostDB.id == post_id).first()
+    if not post:
+        raise HTTPException(
+            status_code=404,
+            detail={"error": "NOT_FOUND", "message": "The requested resource was not found"}
+        )
+    
+    # For simplicity, we'll delete all likes for this post
+    # In a real app, you'd need authentication to know which user to unlike
+    likes = db.query(LikeDB).filter(LikeDB.post_id == post_id).all()
+    if not likes:
+        raise HTTPException(
+            status_code=404,
+            detail={"error": "NOT_FOUND", "message": "No likes found for this post"}
+        )
+    
+    for like in likes:
+        db.delete(like)
+    db.commit()
 
-# API 라우터 등록
-app.include_router(api_router)
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)

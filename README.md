@@ -34,6 +34,7 @@ During this workshop, [GitHub Codespaces](https://docs.github.com/en/codespaces/
 
 - [pyenv](https://github.com/pyenv/pyenv) or [pyenv for Windows](https://github.com/pyenv-win/pyenv-win)
 - Python 3.12+ through pyenv
+- `uv` package manager (recommended) or `pip`
 - VS Code [Python](https://marketplace.visualstudio.com/items/?itemName=ms-python.python) Extension
 - VS Code [Pylance](https://marketplace.visualstudio.com/items/?itemName=ms-python.vscode-pylance) Extension
 - VS Code [Python Debugger](https://marketplace.visualstudio.com/items/?itemName=ms-python.debugpy) Extension
