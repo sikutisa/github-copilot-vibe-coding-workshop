@@ -15,8 +15,9 @@ Refer to the [README](../README.md) doc for preparation.
 - [Check GitHub Copilot Agent Mode](#check-github-copilot-agent-mode)
 - [Prepare Custom Instructions](#prepare-custom-instructions)
 - [Prepare Application Project](#prepare-application-project)
-- [Set-up Figma MCP Server](#set-up-figma-mcp-server)
+- [Prepare Figma MCP Server](#prepare-figma-mcp-server)
 - [Generate UI Components from Figma](#generate-ui-components-from-figma)
+- [Run FastAPI Backend App](#run-fastapi-backend-app)
 - [Build React Frontend App](#build-react-frontend-app)
 - [Verify React Frontend App](#verify-react-frontend-app)
 
@@ -65,18 +66,23 @@ Refer to the [README](../README.md) doc for preparation.
 ### Prepare Application Project
 
 1. Make sure that you're using GitHub Copilot Agent Mode with the model of `Claude Sonnet 4` or `GPT-4.1`.
+1. Make sure that the `context7` MCP server is up and running.
 1. Use prompt like below to scaffold a React web app project.
 
     ```text
     I'd like to scaffold a React web app. Follow the instructions below.
     
+    - Make sure it's the web app, not the mobile app.
     - Your working directory is `javascript`.
     - Identify all the steps first, which you're going to do.
     - Use ViteJS as the frontend app framework.
     - Use default settings when initializing the project.
     - Use `SimpleSocialMediaApplication` as the name of the project while initializing.
     - Use the port number of `3000`.
+    - Only initialize the project. DO NOT go further.
     ```
+
+1. Click the ![the "keep" button image](https://img.shields.io/badge/keep-blue) button of GitHub Copilot to take the changes.
 
 ### Prepare Figma MCP Server
 
@@ -96,9 +102,22 @@ Refer to the [README](../README.md) doc for preparation.
 
 1. Right-click each section - `Home`, `Search`, `Post Details`, `Post Modal` and `Name Input Modal` 👉 Select `Copy/Paste as` 👉 Select `Copy link to selection` to get the link to each section. Take note all five links.
 
+### Run FastAPI Backend App
+
+1. Make sure that the FastAPI backend app is up and running.
+
+    ```text
+    Run the FastAPI backend API, which is located at the `python` directory.
+    ```
+
+   > **NOTE**: You may use the [`complete/python`](../complete/python/) sample app instead.
+
+1. If you use GitHub Codespaces, make sure that the port number `8000` is set to `public` instead of `private`. Otherwise, you'll get the `401` error when accessing from the frontend app.
+
 ### Build React Frontend App
 
 1. Make sure that you're using GitHub Copilot Agent Mode with the model of `Claude Sonnet 4` or `GPT-4.1`.
+1. Make sure that the `context7` MCP server is up and running.
 1. Make sure that you have all the Figma section links of 5 retrieved from the [previous section](#generate-ui-components-from-figma).
 1. Add [`product-requirements.md`](../product-requirements.md) and [`openapi.yaml`](../openapi.yaml) to GitHub Copilot.
 1. Use prompt like below to build the application based on the requirements and OpenAPI document.
@@ -106,20 +125,20 @@ Refer to the [README](../README.md) doc for preparation.
     ```text
     I'd like to build a React web app. Follow the instructions below.
     
-    - Use context7.
     - Your working directory is `javascript`.
     - Identify all the steps first, which you're going to do.
-    - There's a backend API app running on `http://localhost:5050`.
+    - There's a backend API app running on `http://localhost:8000`.
     - Use `openapi.yaml` that describes all the endpoints and data schema.
     - Use the port number of `3000`.
     - Create all the UI components defined in this link: {{FIGMA_SECTION_LINK}}.
+    - DO NOT add anything not related to the UI components.
     - DO NOT add anything not defined in `openapi.yaml`.
     - DO NOT modify anything defined in `openapi.yaml`.
     - Give visual indication when the backend API is unavailable or unreachable for any reason.
     ```
 
 1. Repeat four more times for the rest four Figma design links.
-1. Click the `[keep]` button of GitHub Copilot to take the changes.
+1. Click the ![the "keep" button image](https://img.shields.io/badge/keep-blue) button of GitHub Copilot to take the changes.
 
 ### Verify React Frontend App
 

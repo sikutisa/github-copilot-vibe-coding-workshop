@@ -64,6 +64,7 @@ Refer to the [README](../README.md) doc for preparation.
 ### Prepare Blazor Web App Project
 
 1. Make sure that you're using GitHub Copilot Agent Mode with the model of `Claude Sonnet 4` or `GPT-4.1`.
+1. Make sure that the `context7` MCP server is up and running.
 1. Use prompt like below to scaffold a Blazor web app project.
 
     ```text
@@ -82,11 +83,12 @@ Refer to the [README](../README.md) doc for preparation.
     - If either building or running the app fails, analyze the issues and fix them.
     ```
 
-1. Click the `[keep]` button of GitHub Copilot to take the changes.
+1. Click the ![the keep button image](https://img.shields.io/badge/keep-blue) button of GitHub Copilot to take the changes.
 
 ### Migrate React Web App
 
 1. Make sure that you're using GitHub Copilot Agent Mode with the model of `Claude Sonnet 4` or `GPT-4.1`.
+1. Make sure that the `context7` MCP server is up and running.
 1. Use prompt like below to migrate React to Blazor.
 
     ```text
@@ -119,7 +121,7 @@ Refer to the [README](../README.md) doc for preparation.
    > - Until the build succeeds, iterate this step.
    > - If the build keeps failing, check out the error messages and ask them to GitHub Copilot Agent to figure them out.
 
-1. Click the `[keep]` button of GitHub Copilot to take the changes.
+1. Click the ![the keep button image](https://img.shields.io/badge/keep-blue) button of GitHub Copilot to take the changes.
 1. Once the build succeeds, use prompt like below to verify the migration result.
 
     ```text
@@ -139,7 +141,7 @@ Refer to the [README](../README.md) doc for preparation.
     Run the Spring Boot backend API, which is located at the `java` directory.
     ```
 
-1. Click the `[keep]` button of GitHub Copilot to take the changes.
+1. Click the ![the keep button image](https://img.shields.io/badge/keep-blue) button of GitHub Copilot to take the changes.
 1. Verify if it's built properly or not.
 
     ```text
@@ -150,7 +152,7 @@ Refer to the [README](../README.md) doc for preparation.
 
 1. Open a web browser and navigate to `http://localhost:3031`.
 1. Verify if both frontend and backend apps are running properly.
-1. Click the `[keep]` button of GitHub Copilot to take the changes.
+1. Click the ![the keep button image](https://img.shields.io/badge/keep-blue) button of GitHub Copilot to take the changes.
 
 ---
 

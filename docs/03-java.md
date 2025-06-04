@@ -64,6 +64,7 @@ Refer to the [README](../README.md) doc for preparation.
 ### Prepare Spring Boot Project
 
 1. Make sure that you're using GitHub Copilot Agent Mode with the model of `Claude Sonnet 4` or `GPT-4.1`.
+1. Make sure that the `context7` MCP server is up and running.
 1. Install Spring Boot CLI.
 
     ```bash
@@ -80,8 +81,8 @@ Refer to the [README](../README.md) doc for preparation.
     - Identify all the steps first, which you're going to do.
     - Use Spring Boot CLI to create the Spring Boot app project.
     - Use Gradle as the Java package manager.
-    - Use the package name of `com.contoso.springapp`.
-    - Use the artifact ID of `springapp`.
+    - Use the package name of `com.contoso.socialapp`.
+    - Use the artifact ID of `socialapp`.
     - Use the group ID of `com.contoso`.
     - Use the package type of `jar`.
     - Use OpenJDK version of `21`.
@@ -93,11 +94,12 @@ Refer to the [README](../README.md) doc for preparation.
     - If either building or running the app fails, analyze the issues and fix them.
     ```
 
-1. Click the `[keep]` button of GitHub Copilot to take the changes.
+1. Click the ![the "keep" button image](https://img.shields.io/badge/keep-blue) button of GitHub Copilot to take the changes.
 
 ### Migrate FastAPI API App
 
 1. Make sure that you're using GitHub Copilot Agent Mode with the model of `Claude Sonnet 4` or `GPT-4.1`.
+1. Make sure that the `context7` MCP server is up and running.
 1. Add [`product-requirements.md`](../product-requirements.md) and [`openapi.yaml`](../openapi.yaml) to GitHub Copilot.
 1. Use prompt like below to migrate FastAPI to Spring Boot.
 
@@ -106,7 +108,7 @@ Refer to the [README](../README.md) doc for preparation.
     
     - Use context7.
     - The existing FastAPI application is located at `python`.
-    - Your working directory is `java/springapp`.
+    - Your working directory is `java/socialapp`.
     - Identify all the steps first, which you're going to do.
     - Analyze the application structure of the existing FastAPI app.
     - Migrate all the endpoints. Both corresponding endpoints should be exactly the same as each other.
@@ -121,7 +123,7 @@ Refer to the [README](../README.md) doc for preparation.
     - If necessary, add more packages for OpenAPI and Swagger UI.
     ```
 
-1. Click the `[keep]` button of GitHub Copilot to take the changes.
+1. Click the ![the "keep" button image](https://img.shields.io/badge/keep-blue) button of GitHub Copilot to take the changes.
 1. Once migration is over, use prompt like below to verify the migration result.
 
     ```text
@@ -137,20 +139,20 @@ Refer to the [README](../README.md) doc for preparation.
    > - Until the build succeeds, iterate this step.
    > - If the build keeps failing, check out the error messages and ask them to GitHub Copilot Agent to figure them out.
 
-1. Click the `[keep]` button of GitHub Copilot to take the changes.
+1. Click the ![the "keep" button image](https://img.shields.io/badge/keep-blue) button of GitHub Copilot to take the changes.
 
 ### Verify Spring Boot Backend App
 
 1. Once the application is built, verify if it's written properly or not.
 
     ```text
-    Run the Spring Boot app and verify if the app is properly running. Also verify the OpenAPI endpoint renders exactly the same content as `openapi.yaml`.
+    Run the Spring Boot app and verify if the app is properly running by checking all the endpoints. Also verify the OpenAPI endpoint renders exactly the same content as `openapi.yaml`.
 
     If app running fails, analyze the issues and fix them. Use context7.
     ```
 
 1. Open a web browser and navigate to `http://localhost:8080`.
-1. Click the `[keep]` button of GitHub Copilot to take the changes.
+1. Click the ![the "keep" button image](https://img.shields.io/badge/keep-blue) button of GitHub Copilot to take the changes.
 
 ---
 
