@@ -8,7 +8,9 @@ Refer to the [README](../../README.md) doc for preparation.
 
 ### Run Spring Boot Backend
 
-Use [Java App Sample](../complete/java/).
+Use [Java App Sample](../java/).
+
+> **NOTE**: If you use GitHub Codespaces, make sure that the Java app port, `8080`, is set to **public**.
 
 ### Run Blazor Frontend
 
@@ -27,7 +29,7 @@ Use [Java App Sample](../complete/java/).
 1. Run the app.
 
     ```bash
-    dotnet watch run --project $REPOSITORY_ROOT/complete/dotnet/Contoso.BlazorApp/Contoso.BlazorApp.csproj
+    dotnet watch run --project $REPOSITORY_ROOT/complete/dotnet/Contoso.BlazorApp
     ```
 
 1. Verify if the web application is running properly.
