@@ -16,6 +16,12 @@ But here's the situation...
 - Add custom instruction to GitHub Copilot so that you have more control over GitHub Copilot.
 - Add various MCP servers to GitHub Copilot so that you build the applications more precisely.
 
+## Workshop in Your Language
+
+This workshop material is currently provided in the following languages:
+
+[English](./README.md) | [Español](./localisation/es-es/) | [Português](./localisation/pt-br/) | [Français](./localisation/fr-fr/) | [中文(简体)](./localisation/zh-cn/) | [日本語](./localisation/ja-jp/) | [한국어](./localisation/ko-kr/)
+
 ## Prerequisites
 
 During this workshop, [GitHub Codespaces](https://docs.github.com/en/codespaces/about-codespaces/what-are-codespaces) is highly recommended because there's no need for preparation, except a web browser. However, if you really need to use your machine, make sure you've installed everything identified below.
