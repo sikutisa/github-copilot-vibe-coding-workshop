@@ -79,3 +79,7 @@
 - Swaggerドキュメントを強化するため、コントローラーとモデルにXMLコメントを提供する。
 
 ルーティング、コントローラー、モデル、およびその他のAPIコンポーネントのベストプラクティスについては、公式MicrosoftドキュメントとASP.NET Coreガイドに従ってください。
+
+---
+
+**免責事項**: この文書は[GitHub Copilot](https://docs.github.com/copilot/about-github-copilot/what-is-github-copilot)によってローカライズされています。そのため、間違いを含む可能性があります。不適切または間違った翻訳を見つけた場合は、[issue](https://github.com/microsoft/github-copilot-vibe-coding-workshop/issues/new)を作成してください。

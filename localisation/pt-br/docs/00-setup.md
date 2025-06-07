@@ -350,3 +350,7 @@ Consulte a documentação [README](../README.md) para preparação.
 ---
 
 OK. Você completou a etapa "Ambiente de Desenvolvimento". Vamos seguir para [ETAPA 01: Desenvolvimento de Backend Python](./01-python.md).
+
+---
+
+**Aviso**: Este documento foi localizado pelo [GitHub Copilot](https://docs.github.com/copilot/about-github-copilot/what-is-github-copilot). Portanto, pode conter erros. Se você encontrar alguma tradução inadequada ou incorreta, por favor crie um [issue](https://github.com/microsoft/github-copilot-vibe-coding-workshop/issues/new).

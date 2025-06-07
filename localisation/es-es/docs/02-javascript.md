@@ -163,3 +163,7 @@ Consulta el documento [README](../README.md) para la preparación.
 ---
 
 Bien. Has completado el paso "JavaScript". Vamos al [PASO 03: Migración Java desde Python](./03-java.md).
+
+---
+
+**Disclaimer**: Este documento ha sido localizado por [GitHub Copilot](https://docs.github.com/copilot/about-github-copilot/what-is-github-copilot). Por lo tanto, puede contener errores. Si encuentras alguna traducción que sea inapropiada o errónea, por favor crea un [issue](https://github.com/microsoft/github-copilot-vibe-coding-workshop/issues/new).
