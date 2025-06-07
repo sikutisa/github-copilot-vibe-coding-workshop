@@ -20,7 +20,7 @@ Contosoは様々なアウトドア活動用製品を販売する会社です。C
 
 このワークショップ教材は現在、以下の言語で提供されています：
 
-[English](../../README.md) | [Español](../es-es/) | [Português](../pt-br/) | [Français](../fr-fr/) | [中文(简体)](../zh-cn/) | [日本語](./README.md) | [한국어](../ko-kr/)
+[English](../../README.md) | [Español](../es-es/) | [Français](../fr-fr/) | [日本語](./README.md) | [한국어](../ko-kr/) | [Português](../pt-br/) | [中文(简体)](../zh-cn/)
 
 ## 前提条件
 

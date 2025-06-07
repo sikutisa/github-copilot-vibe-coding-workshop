@@ -20,7 +20,7 @@ Mais voici la situation...
 
 Ce matériel d'atelier est actuellement fourni dans les langues suivantes :
 
-[English](../../README.md) | [Español](../es-es/) | [Português](../pt-br/) | [Français](./README.md) | [中文(简体)](../zh-cn/) | [日本語](../ja-jp/) | [한국어](../ko-kr/)
+[English](../../README.md) | [Español](../es-es/) | [Français](./README.md) | [日本語](../ja-jp/) | [한국어](../ko-kr/) | [Português](../pt-br/) | [中文(简体)](../zh-cn/)
 
 ## Prérequis
 

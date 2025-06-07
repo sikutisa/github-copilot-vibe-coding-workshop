@@ -20,7 +20,7 @@ Mas aqui está a situação...
 
 Este material do workshop está atualmente disponível nos seguintes idiomas:
 
-[English](../../README.md) | [Español](../es-es/) | [Português](./README.md) | [Français](../fr-fr/) | [中文(简体)](../zh-cn/) | [日本語](../ja-jp/) | [한국어](../ko-kr/)
+[English](../../README.md) | [Español](../es-es/) | [Français](../fr-fr/) | [日本語](../ja-jp/) | [한국어](../ko-kr/) | [Português](./README.md) | [中文(简体)](../zh-cn/)
 
 ## Pré-requisitos
 

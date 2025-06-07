@@ -20,7 +20,7 @@ Pero aquí está la situación...
 
 Este material del taller está actualmente disponible en los siguientes idiomas:
 
-[English](../../README.md) | [Español](./README.md) | [Português](../pt-br/) | [Français](../fr-fr/) | [中文(简体)](../zh-cn/) | [日本語](../ja-jp/) | [한국어](../ko-kr/)
+[English](../../README.md) | [Español](./README.md) | [Français](../fr-fr/) | [日本語](../ja-jp/) | [한국어](../ko-kr/) | [Português](../pt-br/) | [中文(简体)](../zh-cn/)
 
 ## Prerrequisitos
 

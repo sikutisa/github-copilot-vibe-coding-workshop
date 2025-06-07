@@ -20,7 +20,7 @@ Contoso는 다양한 야외 활동 제품을 판매하는 회사입니다. Conto
 
 이 워크샵 자료는 현재 다음 언어로 제공됩니다:
 
-[English](../../README.md) | [Español](../es-es/) | [Português](../pt-br/) | [Français](../fr-fr/) | [中文(简体)](../zh-cn/) | [日本語](../ja-jp/) | [한국어](./README.md)
+[English](../../README.md) | [Español](../es-es/) | [Français](../fr-fr/) | [日本語](../ja-jp/) | [한국어](./README.md) | [Português](../pt-br/) | [中文(简体)](../zh-cn/)
 
 ## 전제 조건
 
