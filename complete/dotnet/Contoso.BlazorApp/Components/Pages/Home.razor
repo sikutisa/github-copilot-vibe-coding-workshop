@@ -68,9 +68,9 @@
         }
     }
 
-    private async Task HandleAuthStateChanged()
+    private void HandleAuthStateChanged()
     {
-        await InvokeAsync(async () =>
+        InvokeAsync(async () =>
         {
             if (!AuthService.AuthState.IsLoading && !AuthService.AuthState.IsAuthenticated)
             {

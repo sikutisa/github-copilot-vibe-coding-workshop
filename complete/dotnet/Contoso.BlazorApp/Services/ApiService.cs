@@ -46,10 +46,12 @@ public class ApiService
             _logger.LogInformation("Using GitHub Codespaces URL: {CodespacesUrl}", codespacesUrl);
             return codespacesUrl;
         }
-        
+
         // Fall back to configured base URL (localhost)
-        _logger.LogInformation("Using configured base URL: {ConfiguredUrl}", configuredBaseUrl);
-        return configuredBaseUrl;
+        // Ensure the URL ends with a forward slash for proper relative path resolution
+        var normalizedUrl = configuredBaseUrl.TrimEnd('/') + "/";
+        _logger.LogInformation("Using configured base URL: {ConfiguredUrl}", normalizedUrl);
+        return normalizedUrl;
     }
 
     private void SetAuthHeaders()
