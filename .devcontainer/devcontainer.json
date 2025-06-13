@@ -12,6 +12,7 @@
     "ghcr.io/devcontainers/features/java:latest": {
       "installGradle": true,
       "installMaven": true,
+      "mavenVersion": "3.9.10",
       "version": "21"
     },
     "ghcr.io/devcontainers/features/node:latest": {},
