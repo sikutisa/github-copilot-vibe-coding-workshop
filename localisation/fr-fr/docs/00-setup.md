@@ -18,6 +18,7 @@ Consultez le document [README](../README.md) pour la préparation.
   - [Démarrer Visual Studio Code](#démarrer-visual-studio-code)
   - [Configurer les Serveurs MCP](#configurer-les-serveurs-mcp)
 - [Vérifier le Mode Agent GitHub Copilot](#vérifier-le-mode-agent-github-copilot)
+- [Configurer le Mode Bête](#configurer-le-mode-bête)
 - [Préparer les Instructions Personnalisées](#préparer-les-instructions-personnalisées)
 - [Analyser le Document d'Exigences Produit (PRD) et Concevoir l'API](#analyser-le-document-dexigences-produit-prd-et-concevoir-lapi)
 
@@ -256,6 +257,7 @@ Consultez le document [README](../README.md) pour la préparation.
 
 ### Configurer les Serveurs MCP
 
+1. Assurez-vous que Docker Desktop est en cours d'exécution si vous utilisez VS Code sur votre machine locale.
 1. Définissez la variable d'environnement de `$REPOSITORY_ROOT`.
 
    ```bash
@@ -284,6 +286,7 @@ Consultez le document [README](../README.md) pour la préparation.
 
 1. Ouvrez la Palette de Commandes en tapant F1 ou `Ctrl`+`Shift`+`P` sur Windows ou `Cmd`+`Shift`+`P` sur Mac OS, et recherchez `MCP: List Servers`.
 1. Choisissez `context7` puis cliquez sur `Start Server`.
+1. Choisissez `awesome-copilot` puis cliquez sur `Start Server`.
 
 ## Vérifier le Mode Agent GitHub Copilot
 
@@ -297,6 +300,40 @@ Consultez le document [README](../README.md) pour la préparation.
    ![Mode Agent GitHub Copilot](../../../docs/images/setup-03.png)
 
 1. Sélectionnez le modèle soit `GPT-4.1` soit `Claude Sonnet 4`.
+
+## Configurer le Mode Bête
+
+1. Entrez `/mcp.awesome-copilot.get_search_prompt`, suivi de mots-clés comme "beast mode"
+
+   Cela devrait afficher la liste des modes de chat bête. Entrez un prompt similaire à `4.1 Beast Chat Mode`. Ensuite, il sera sauvegardé sous le répertoire `.github/chatmodes`.
+
+1. Choisissez le mode `4.1-Beast` au lieu du mode `Agent`. Il changera automatiquement le LLM vers `GPT 4.1`.
+
+1. Définissez la variable d'environnement de `$REPOSITORY_ROOT`.
+
+   ```bash
+   # bash/zsh
+   REPOSITORY_ROOT=$(git rev-parse --show-toplevel)
+   ```
+
+   ```powershell
+   # PowerShell
+   $REPOSITORY_ROOT = git rev-parse --show-toplevel
+   ```
+
+1. Copiez les paramètres de l'espace de travail.
+
+    ```bash
+    # bash/zsh
+    cp $REPOSITORY_ROOT/docs/.vscode/settings.json \
+       $REPOSITORY_ROOT/.vscode/settings.json
+    ```
+
+    ```powershell
+    # PowerShell
+    Copy-Item -Path $REPOSITORY_ROOT/docs/.vscode/settings.json `
+              -Destination $REPOSITORY_ROOT/.vscode/settings.json -Force
+    ```
 
 ## Préparer les Instructions Personnalisées
 

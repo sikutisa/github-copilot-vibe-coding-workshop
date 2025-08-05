@@ -18,6 +18,7 @@
   - [Visual Studio Code を起動](#visual-studio-code-を起動)
   - [MCP サーバーを設定](#mcp-サーバーを設定)
 - [GitHub Copilot エージェントモードを確認](#github-copilot-エージェントモードを確認)
+- [ビーストモードを設定](#ビーストモードを設定)
 - [カスタム指示を準備](#カスタム指示を準備)
 - [製品要求仕様書（PRD）を分析してAPIを設計](#製品要求仕様書prdを分析してapiを設計)
 
@@ -256,6 +257,7 @@
 
 ### MCP サーバーを設定
 
+1. ローカルマシンでVS Codeを使用している場合は、Docker Desktopが起動していることを確認してください。
 1. `$REPOSITORY_ROOT` 環境変数を設定します。
 
    ```bash
@@ -284,6 +286,7 @@
 
 1. F1 キーまたは Windows では `Ctrl`+`Shift`+`P`、Mac OS では `Cmd`+`Shift`+`P` を入力してコマンドパレットを開き、`MCP: List Servers` を検索します。
 1. `context7` を選択して `Start Server` をクリックします。
+1. `awesome-copilot` を選択して `Start Server` をクリックします。
 
 ## GitHub Copilot エージェントモードを確認
 
@@ -297,6 +300,40 @@
    ![GitHub Copilot エージェントモード](../../../docs/images/setup-03.png)
 
 1. モデルを `GPT-4.1` または `Claude Sonnet 4` のいずれかに選択します。
+
+## ビーストモードを設定
+
+1. `/mcp.awesome-copilot.get_search_prompt` を入力し、続いて "beast mode" のようなキーワードを入力します
+
+   ビーストチャットモードのリストが表示されます。`4.1 Beast Chat Mode` のようなプロンプトを入力します。すると、`.github/chatmodes` ディレクトリに保存されます。
+
+1. `Agent` モードの代わりに `4.1-Beast` モードを選択します。自動的にLLMが `GPT 4.1` に変更されます。
+
+1. `$REPOSITORY_ROOT` 環境変数を設定します。
+
+   ```bash
+   # bash/zsh
+   REPOSITORY_ROOT=$(git rev-parse --show-toplevel)
+   ```
+
+   ```powershell
+   # PowerShell
+   $REPOSITORY_ROOT = git rev-parse --show-toplevel
+   ```
+
+1. ワークスペース設定をコピーします。
+
+    ```bash
+    # bash/zsh
+    cp $REPOSITORY_ROOT/docs/.vscode/settings.json \
+       $REPOSITORY_ROOT/.vscode/settings.json
+    ```
+
+    ```powershell
+    # PowerShell
+    Copy-Item -Path $REPOSITORY_ROOT/docs/.vscode/settings.json `
+              -Destination $REPOSITORY_ROOT/.vscode/settings.json -Force
+    ```
 
 ## カスタム指示を準備
 
