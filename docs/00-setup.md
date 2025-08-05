@@ -18,6 +18,7 @@ Refer to the [README](../README.md) doc for preparation.
   - [Start Visual Studio Code](#start-visual-studio-code)
   - [Set-up MCP Servers](#set-up-mcp-servers)
 - [Check GitHub Copilot Agent Mode](#check-github-copilot-agent-mode)
+- [Configure Beast Mode](#configure-beast-mode)
 - [Prepare Custom Instructions](#prepare-custom-instructions)
 - [Analyze Product Requirements Document (PRD) and Design API](#analyze-product-requirements-document-prd-and-design-api)
 
@@ -256,6 +257,7 @@ Refer to the [README](../README.md) doc for preparation.
 
 ### Set-up MCP Servers
 
+1. Make sure Docker Desktop is up and running if you use VS Code on your local machine.
 1. Set the environment variable of `$REPOSITORY_ROOT`.
 
    ```bash
@@ -284,6 +286,7 @@ Refer to the [README](../README.md) doc for preparation.
 
 1. Open Command Palette by typing F1 or `Ctrl`+`Shift`+`P` on Windows or `Cmd`+`Shift`+`P` on Mac OS, and search `MCP: List Servers`.
 1. Choose `context7` then click `Start Server`.
+1. Choose `awesome-copilot` then click `Start Server`.
 
 ## Check GitHub Copilot Agent Mode
 
@@ -297,6 +300,40 @@ Refer to the [README](../README.md) doc for preparation.
    ![GitHub Copilot Agent Mode](./images/setup-03.png)
 
 1. Select model to either `GPT-4.1` or `Claude Sonnet 4`.
+
+## Configure Beast Mode
+
+1. Enter the `/mcp.awesome-copilot.get_search_prompt`, followed by entering keywords like "beast mode"
+
+   It should show list of beast chatmodes. Enter a prompt similar to `4.1 Beast Chat Mode`. Then it will save it under the `.github/chatmodes` directory.
+
+1. Choose the `4.1-Beast` mode instead of the `Agent` mode. It will automatically change LLM to `GPT 4.1`.
+
+1. Set the environment variable of `$REPOSITORY_ROOT`.
+
+   ```bash
+   # bash/zsh
+   REPOSITORY_ROOT=$(git rev-parse --show-toplevel)
+   ```
+
+   ```powershell
+   # PowerShell
+   $REPOSITORY_ROOT = git rev-parse --show-toplevel
+   ```
+
+1. Copy workspace settings.
+
+    ```bash
+    # bash/zsh
+    cp $REPOSITORY_ROOT/docs/.vscode/settings.json \
+       $REPOSITORY_ROOT/.vscode/settings.json
+    ```
+
+    ```powershell
+    # PowerShell
+    Copy-Item -Path $REPOSITORY_ROOT/docs/.vscode/settings.json `
+              -Destination $REPOSITORY_ROOT/.vscode/settings.json -Force
+    ```
 
 ## Prepare Custom Instructions
 
