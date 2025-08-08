@@ -15,7 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/posts/{postId}/likes")
+@RequestMapping("/posts/{postId}/likes")
 @RequiredArgsConstructor
 @Slf4j
 @Tag(name = "Likes", description = "Operations related to likes")
